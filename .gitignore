@@ -1,0 +1,10 @@
+# general ignore files
+slprj
+*_ert_rtw
+*_grt_rtw
+*.elf
+*.slxc
+*.mexa64
+*.mexw64
+rtwmakecfg.m
+SFB*SFB.mat
