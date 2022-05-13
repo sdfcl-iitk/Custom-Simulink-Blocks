@@ -15,7 +15,6 @@
 /* %%%-SFUNWIZ_wrapper_includes_Changes_BEGIN --- EDIT HERE TO _END */
 #ifndef MATLAB_MEX_FILE
 #include <LCD_I2C_driver.h>
-LCD_I2C_driver lcd;
 #endif
 /* %%%-SFUNWIZ_wrapper_includes_Changes_END --- EDIT HERE TO _BEGIN */
 #define u_width 2
@@ -32,14 +31,16 @@ LCD_I2C_driver lcd;
  * Start function
  *
  */
-void LCD_I2C_Start_wrapper(void)
+void LCD_I2C_Start_wrapper(void **pW)
 {
 /* %%%-SFUNWIZ_wrapper_Start_Changes_BEGIN --- EDIT HERE TO _END */
 /*
  * Custom Start code goes here.
  */
     #ifndef MATLAB_MEX_FILE
-    lcd.begin();
+    LCD_I2C_driver *lcd = new LCD_I2C_driver();
+    lcd->begin();
+    pW[0] = (void *)lcd;
     #endif
 /* %%%-SFUNWIZ_wrapper_Start_Changes_END --- EDIT HERE TO _BEGIN */
 }
@@ -47,7 +48,8 @@ void LCD_I2C_Start_wrapper(void)
  * Output function
  *
  */
-void LCD_I2C_Outputs_wrapper(const uint8_T *str)
+void LCD_I2C_Outputs_wrapper(const uint8_T *str,
+			void **pW)
 {
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_BEGIN --- EDIT HERE TO _END */
 /* This sample sets the output equal to the input
@@ -73,15 +75,34 @@ void LCD_I2C_Outputs_wrapper(const uint8_T *str)
     out[16] = 0;
     out[33] = 0;
 
+    // get lcd object
+    LCD_I2C_driver *lcd = (LCD_I2C_driver *)pW[0];
+
     // print the first row
-    lcd.setCursor(0,0);
-    lcd.print(out);
+    lcd->setCursor(0,0);
+    lcd->print(out);
 
     // print the second row
-    lcd.setCursor(1,0);
-    lcd.print(out+17);
+    lcd->setCursor(1,0);
+    lcd->print(out+17);
     #endif
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_END --- EDIT HERE TO _BEGIN */
 }
 
+/*
+ * Terminate function
+ *
+ */
+void LCD_I2C_Terminate_wrapper(void **pW)
+{
+/* %%%-SFUNWIZ_wrapper_Terminate_Changes_BEGIN --- EDIT HERE TO _END */
+/*
+ * Custom Terminate code goes here.
+ */
+    #ifndef MATLAB_MEX_FILE
+    LCD_I2C_driver *lcd = (LCD_I2C_driver *)pW[0];
+    delete lcd;
+    #endif
+/* %%%-SFUNWIZ_wrapper_Terminate_Changes_END --- EDIT HERE TO _BEGIN */
+}
 

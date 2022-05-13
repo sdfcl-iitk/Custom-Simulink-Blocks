@@ -15,7 +15,6 @@
 /* %%%-SFUNWIZ_wrapper_includes_Changes_BEGIN --- EDIT HERE TO _END */
 #ifndef MATLAB_MEX_FILE
 #include <MPU9250_driver.h>
-MPU9250_driver mpu;
 #endif
 /* %%%-SFUNWIZ_wrapper_includes_Changes_END --- EDIT HERE TO _BEGIN */
 #define y_width 1
@@ -32,14 +31,16 @@ MPU9250_driver mpu;
  * Start function
  *
  */
-void MPU9250_Start_wrapper(void)
+void MPU9250_Start_wrapper(void **pW)
 {
 /* %%%-SFUNWIZ_wrapper_Start_Changes_BEGIN --- EDIT HERE TO _END */
 /*
  * Custom Start code goes here.
  */
     #ifndef MATLAB_MEX_FILE
-    mpu.begin();
+    MPU9250_driver *mpu = new MPU9250_driver();
+    mpu->begin();
+    pW[0] = (void *)mpu;
     #endif
 /* %%%-SFUNWIZ_wrapper_Start_Changes_END --- EDIT HERE TO _BEGIN */
 }
@@ -50,7 +51,8 @@ void MPU9250_Start_wrapper(void)
 void MPU9250_Outputs_wrapper(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp)
+			real_T *temp,
+			void **pW)
 {
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_BEGIN --- EDIT HERE TO _END */
 /* This sample sets the output equal to the input
@@ -61,21 +63,23 @@ void MPU9250_Outputs_wrapper(real_T *acc,
       y1[0].im = u1[0].im;
  */
     #ifndef MATLAB_MEX_FILE
-    mpu.update();
+    MPU9250_driver *mpu = (MPU9250_driver *)pW[0];
 
-    acc[0] = mpu.getAcc(0);
-    acc[1] = mpu.getAcc(1);
-    acc[2] = mpu.getAcc(2);
+    mpu->update();
 
-    gyro[0] = mpu.getGyro(0);
-    gyro[1] = mpu.getGyro(1);
-    gyro[2] = mpu.getGyro(2);
+    acc[0] = mpu->getAcc(0);
+    acc[1] = mpu->getAcc(1);
+    acc[2] = mpu->getAcc(2);
 
-    mag[0] = mpu.getMag(0);
-    mag[1] = mpu.getMag(1);
-    mag[2] = mpu.getMag(2);
+    gyro[0] = mpu->getGyro(0);
+    gyro[1] = mpu->getGyro(1);
+    gyro[2] = mpu->getGyro(2);
 
-    temp[0] = mpu.getTemperature();
+    mag[0] = mpu->getMag(0);
+    mag[1] = mpu->getMag(1);
+    mag[2] = mpu->getMag(2);
+
+    temp[0] = mpu->getTemperature();
     #else
     acc[0] = 0;
     acc[1] = 0;
@@ -94,4 +98,20 @@ void MPU9250_Outputs_wrapper(real_T *acc,
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_END --- EDIT HERE TO _BEGIN */
 }
 
+/*
+ * Terminate function
+ *
+ */
+void MPU9250_Terminate_wrapper(void **pW)
+{
+/* %%%-SFUNWIZ_wrapper_Terminate_Changes_BEGIN --- EDIT HERE TO _END */
+/*
+ * Custom Terminate code goes here.
+ */
+    #ifndef MATLAB_MEX_FILE
+    MPU9250_driver *mpu = (MPU9250_driver *)pW[0];
+    delete mpu;
+    #endif
+/* %%%-SFUNWIZ_wrapper_Terminate_Changes_END --- EDIT HERE TO _BEGIN */
+}
 

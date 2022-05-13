@@ -1,5 +1,5 @@
 %% File : LCD_I2C.tlc
-%% Created : Thu May 12 18:08:37 2022
+%% Created : Fri May 13 15:19:37 2022
 %%
 %% Description: 
 %%   Simulink Coder wrapper functions interface generated for 
@@ -41,8 +41,10 @@
     #else
     #define SFB_EXTERN_C extern
     #endif
-    SFB_EXTERN_C void LCD_I2C_Start_wrapper_accel(void);
-    SFB_EXTERN_C void LCD_I2C_Outputs_wrapper_accel(const uint8_T *str);
+    SFB_EXTERN_C void LCD_I2C_Start_wrapper_accel(void **pW);
+    SFB_EXTERN_C void LCD_I2C_Outputs_wrapper_accel(const uint8_T *str,
+			void **pW);
+    SFB_EXTERN_C void LCD_I2C_Terminate_wrapper_accel(void **pW);
     #undef SFB_EXTERN_C
     #endif
     %closefile hFile
@@ -59,14 +61,20 @@
     #include "%<hFileName>.h"
     
 
-    extern void LCD_I2C_Start_wrapper(void);
-    extern void LCD_I2C_Outputs_wrapper(const uint8_T *str);
-    extern void LCD_I2C_Terminate_wrapper(void);
-    void LCD_I2C_Start_wrapper_accel(void){
-    LCD_I2C_Start_wrapper();
+    extern void LCD_I2C_Start_wrapper(void **pW);
+    extern void LCD_I2C_Outputs_wrapper(const uint8_T *str,
+			void **pW);
+    extern void LCD_I2C_Terminate_wrapper(void **pW);
+    void LCD_I2C_Start_wrapper_accel(void **pW){
+    LCD_I2C_Start_wrapper(pW);
     }
-    void LCD_I2C_Outputs_wrapper_accel(const uint8_T *str){
-    LCD_I2C_Outputs_wrapper(str);
+    void LCD_I2C_Outputs_wrapper_accel(const uint8_T *str,
+			void **pW){
+    LCD_I2C_Outputs_wrapper(str,
+			pW);
+    }
+    void LCD_I2C_Terminate_wrapper_accel(void **pW){
+    LCD_I2C_Terminate_wrapper(pW);
     }
 
     %closefile cFile
@@ -92,8 +100,10 @@
     #else
     #define SFB_EXTERN_C extern
     #endif
-    SFB_EXTERN_C void LCD_I2C_Start_wrapper_cgen(void);
-    SFB_EXTERN_C void LCD_I2C_Outputs_wrapper_cgen(const uint8_T *str);
+    SFB_EXTERN_C void LCD_I2C_Start_wrapper_cgen(void **pW);
+    SFB_EXTERN_C void LCD_I2C_Outputs_wrapper_cgen(const uint8_T *str,
+			void **pW);
+    SFB_EXTERN_C void LCD_I2C_Terminate_wrapper_cgen(void **pW);
     #undef SFB_EXTERN_C
     #endif
     %closefile hFile
@@ -109,13 +119,20 @@
     #endif
     #include "%<hFileName>.h"
 
-	extern void LCD_I2C_Start_wrapper(void);
-	extern void LCD_I2C_Outputs_wrapper(const uint8_T *str);
-	 void LCD_I2C_Start_wrapper_cgen(void) {
-	LCD_I2C_Start_wrapper();
+	extern void LCD_I2C_Start_wrapper(void **pW);
+	extern void LCD_I2C_Outputs_wrapper(const uint8_T *str,
+			void **pW);
+	extern void LCD_I2C_Terminate_wrapper(void **pW);
+	 void LCD_I2C_Start_wrapper_cgen(void **pW) {
+	LCD_I2C_Start_wrapper(pW);
 	}
-	 void LCD_I2C_Outputs_wrapper_cgen(const uint8_T *str) {
-	LCD_I2C_Outputs_wrapper(str);
+	 void LCD_I2C_Outputs_wrapper_cgen(const uint8_T *str,
+			void **pW) {
+	LCD_I2C_Outputs_wrapper(str,
+			pW);
+	}
+	 void LCD_I2C_Terminate_wrapper_cgen(void **pW) {
+	LCD_I2C_Terminate_wrapper(pW);
 	}
     %closefile cFile
 
@@ -129,11 +146,12 @@
     #define SFB_EXTERN_C extern
     #endif
 
-    SFB_EXTERN_C void LCD_I2C_Start_wrapper(void);
+    SFB_EXTERN_C void LCD_I2C_Start_wrapper(void **pW);
 
-    SFB_EXTERN_C void LCD_I2C_Outputs_wrapper(const uint8_T *str);
+    SFB_EXTERN_C void LCD_I2C_Outputs_wrapper(const uint8_T *str,
+			void **pW);
 
-    SFB_EXTERN_C void LCD_I2C_Terminate_wrapper(void);
+    SFB_EXTERN_C void LCD_I2C_Terminate_wrapper(void **pW);
 
     #undef SFB_EXTERN_C
   %closefile externs
@@ -148,11 +166,12 @@
 %%
 %function Start(block, system) Output
    /* %<Type> Block: %<Name> */
+  %assign ppw = LibBlockDWorkAddr(PWORK, "", "", 0)
   
   %if IsModelReferenceSimTarget() || CodeFormat == "S-Function" || ::isRAccel
-    LCD_I2C_Start_wrapper_accel();
+    LCD_I2C_Start_wrapper_accel(%<ppw>);
   %else
-    LCD_I2C_Start_wrapper_cgen();
+    LCD_I2C_Start_wrapper_cgen(%<ppw>);
   %endif
 
 %endfunction
@@ -163,17 +182,31 @@
 %%
 %function Outputs(block, system) Output
   %%
+  %assign ppw = LibBlockDWorkAddr(PWORK, "", "", 0)
   %assign pu0 = LibBlockInputSignalAddr(0, "", "", 0)
   
   %if IsModelReferenceSimTarget() || CodeFormat == "S-Function" || ::isRAccel
-    LCD_I2C_Outputs_wrapper_accel(%<pu0>);
+    LCD_I2C_Outputs_wrapper_accel(%<pu0>, %<ppw>);
   %else
-    LCD_I2C_Outputs_wrapper_cgen(%<pu0>);
+    LCD_I2C_Outputs_wrapper_cgen(%<pu0>, %<ppw>);
   %endif
 
   %%
 %endfunction
 
+%% Function: Terminate ========================================================
+%%
+%function Terminate(block, system) Output
+   /* %<Type> Block: %<Name> */
+  %assign ppw = LibBlockDWorkAddr(PWORK, "", "", 0)
+  
+  %if IsModelReferenceSimTarget() || CodeFormat == "S-Function" || ::isRAccel
+    LCD_I2C_Terminate_wrapper_accel(%<ppw>);
+  %else
+    LCD_I2C_Terminate_wrapper_cgen(%<ppw>);
+  %endif
+
+%endfunction
 
 %% [EOF] LCD_I2C.tlc
 

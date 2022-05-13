@@ -26,7 +26,7 @@
  * | See matlabroot/simulink/src/sfuntmpl_doc.c for a more detailed template |
  *  -------------------------------------------------------------------------
  *
- * Created: Thu May 12 17:43:53 2022
+ * Created: Fri May 13 15:16:38 2022
  */
 
 #define S_FUNCTION_LEVEL               2
@@ -111,23 +111,25 @@
 #define NUM_CONT_STATES                0
 #define CONT_STATES_IC                 [0]
 #define SFUNWIZ_GENERATE_TLC           1
-#define SOURCEFILES                    "__SFB__libi2c.a__SFB__"
+#define SOURCEFILES                    "__SFB__libi2c.a"
 #define PANELINDEX                     N/A
 #define USE_SIMSTRUCT                  0
 #define SHOW_COMPILE_STEPS             0
 #define CREATE_DEBUG_MEXFILE           0
-#define SAVE_CODE_ONLY                 0
+#define SAVE_CODE_ONLY                 1
 #define SFUNWIZ_REVISION               3.0
 
 /* %%%-SFUNWIZ_defines_Changes_END --- EDIT HERE TO _BEGIN */
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 #include "simstruc.h"
 
-extern void MPU9250_Start_wrapper(void);
+extern void MPU9250_Start_wrapper(void **pW);
 extern void MPU9250_Outputs_wrapper(real_T *acc,
   real_T *gyro,
   real_T *mag,
-  real_T *temp);
+  real_T *temp,
+  void **pW);
+extern void MPU9250_Terminate_wrapper(void **pW);
 
 /*====================*
  * S-function methods *
@@ -145,7 +147,7 @@ static void mdlInitializeSizes(SimStruct *S)
   }
 
   ssSetArrayLayoutForCodeGen(S, SS_COLUMN_MAJOR);
-  ssSetOperatingPointCompliance(S, USE_DEFAULT_OPERATING_POINT);
+  ssSetOperatingPointCompliance(S, DISALLOW_OPERATING_POINT);
   ssSetNumContStates(S, NUM_CONT_STATES);
   ssSetNumDiscStates(S, NUM_DISC_STATES);
   if (!ssSetNumInputPorts(S, NUM_INPUTS))
@@ -181,7 +183,7 @@ static void mdlInitializeSizes(SimStruct *S)
   ssSetOutputPortWidth(S, 3, OUTPUT_3_WIDTH);
   ssSetOutputPortDataType(S, 3, SS_DOUBLE);
   ssSetOutputPortComplexSignal(S, 3, OUTPUT_3_COMPLEX);
-  ssSetNumPWork(S, 0);
+  ssSetNumPWork(S, 1);
   ssSetNumSampleTimes(S, 1);
   ssSetNumRWork(S, 0);
   ssSetNumIWork(S, 0);
@@ -231,7 +233,8 @@ static void mdlSetDefaultPortDataTypes(SimStruct *S)
  */
 static void mdlStart(SimStruct *S)
 {
-  MPU9250_Start_wrapper();
+  void **pW = ssGetPWork(S);
+  MPU9250_Start_wrapper(pW);
 }
 
 #endif                                 /*  MDL_START */
@@ -241,11 +244,12 @@ static void mdlStart(SimStruct *S)
  */
 static void mdlOutputs(SimStruct *S, int_T tid)
 {
+  void **pW = ssGetPWork(S);
   real_T *acc = (real_T *) ssGetOutputPortRealSignal(S, 0);
   real_T *gyro = (real_T *) ssGetOutputPortRealSignal(S, 1);
   real_T *mag = (real_T *) ssGetOutputPortRealSignal(S, 2);
   real_T *temp = (real_T *) ssGetOutputPortRealSignal(S, 3);
-  MPU9250_Outputs_wrapper(acc, gyro, mag, temp);
+  MPU9250_Outputs_wrapper(acc, gyro, mag, temp, pW);
 }
 
 /* Function: mdlTerminate =====================================================
@@ -256,6 +260,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
  */
 static void mdlTerminate(SimStruct *S)
 {
+  void **pW = ssGetPWork(S);
+  MPU9250_Terminate_wrapper(pW);
 }
 
 #ifdef MATLAB_MEX_FILE                 /* Is this file being compiled as a MEX-file? */

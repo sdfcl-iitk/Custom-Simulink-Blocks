@@ -26,7 +26,7 @@
  * | See matlabroot/simulink/src/sfuntmpl_doc.c for a more detailed template |
  *  -------------------------------------------------------------------------
  *
- * Created: Thu May 12 18:08:37 2022
+ * Created: Fri May 13 15:19:37 2022
  */
 
 #define S_FUNCTION_LEVEL               2
@@ -73,8 +73,10 @@
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 #include "simstruc.h"
 
-extern void LCD_I2C_Start_wrapper(void);
-extern void LCD_I2C_Outputs_wrapper(const uint8_T *str);
+extern void LCD_I2C_Start_wrapper(void **pW);
+extern void LCD_I2C_Outputs_wrapper(const uint8_T *str,
+  void **pW);
+extern void LCD_I2C_Terminate_wrapper(void **pW);
 
 /*====================*
  * S-function methods *
@@ -93,7 +95,7 @@ static void mdlInitializeSizes(SimStruct *S)
   }
 
   ssSetArrayLayoutForCodeGen(S, SS_COLUMN_MAJOR);
-  ssSetOperatingPointCompliance(S, USE_DEFAULT_OPERATING_POINT);
+  ssSetOperatingPointCompliance(S, DISALLOW_OPERATING_POINT);
   ssSetNumContStates(S, NUM_CONT_STATES);
   ssSetNumDiscStates(S, NUM_DISC_STATES);
   if (!ssSetNumInputPorts(S, NUM_INPUTS))
@@ -110,7 +112,7 @@ static void mdlInitializeSizes(SimStruct *S)
   ssSetInputPortRequiredContiguous(S, 0, 1);/*direct input signal access*/
   if (!ssSetNumOutputPorts(S, NUM_OUTPUTS))
     return;
-  ssSetNumPWork(S, 0);
+  ssSetNumPWork(S, 1);
   ssSetNumSampleTimes(S, 1);
   ssSetNumRWork(S, 0);
   ssSetNumIWork(S, 0);
@@ -168,7 +170,8 @@ static void mdlSetDefaultPortDataTypes(SimStruct *S)
  */
 static void mdlStart(SimStruct *S)
 {
-  LCD_I2C_Start_wrapper();
+  void **pW = ssGetPWork(S);
+  LCD_I2C_Start_wrapper(pW);
 }
 
 #endif                                 /*  MDL_START */
@@ -178,8 +181,9 @@ static void mdlStart(SimStruct *S)
  */
 static void mdlOutputs(SimStruct *S, int_T tid)
 {
+  void **pW = ssGetPWork(S);
   const uint8_T *str = (uint8_T *) ssGetInputPortRealSignal(S, 0);
-  LCD_I2C_Outputs_wrapper(str);
+  LCD_I2C_Outputs_wrapper(str, pW);
 }
 
 /* Function: mdlTerminate =====================================================
@@ -190,6 +194,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
  */
 static void mdlTerminate(SimStruct *S)
 {
+  void **pW = ssGetPWork(S);
+  LCD_I2C_Terminate_wrapper(pW);
 }
 
 #ifdef MATLAB_MEX_FILE                 /* Is this file being compiled as a MEX-file? */

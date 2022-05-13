@@ -1,5 +1,5 @@
 %% File : MPU9250.tlc
-%% Created : Thu May 12 17:43:53 2022
+%% Created : Fri May 13 15:16:38 2022
 %%
 %% Description: 
 %%   Simulink Coder wrapper functions interface generated for 
@@ -41,11 +41,13 @@
     #else
     #define SFB_EXTERN_C extern
     #endif
-    SFB_EXTERN_C void MPU9250_Start_wrapper_accel(void);
+    SFB_EXTERN_C void MPU9250_Start_wrapper_accel(void **pW);
     SFB_EXTERN_C void MPU9250_Outputs_wrapper_accel(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp);
+			real_T *temp,
+			void **pW);
+    SFB_EXTERN_C void MPU9250_Terminate_wrapper_accel(void **pW);
     #undef SFB_EXTERN_C
     #endif
     %closefile hFile
@@ -62,23 +64,29 @@
     #include "%<hFileName>.h"
     
 
-    extern void MPU9250_Start_wrapper(void);
+    extern void MPU9250_Start_wrapper(void **pW);
     extern void MPU9250_Outputs_wrapper(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp);
-    extern void MPU9250_Terminate_wrapper(void);
-    void MPU9250_Start_wrapper_accel(void){
-    MPU9250_Start_wrapper();
+			real_T *temp,
+			void **pW);
+    extern void MPU9250_Terminate_wrapper(void **pW);
+    void MPU9250_Start_wrapper_accel(void **pW){
+    MPU9250_Start_wrapper(pW);
     }
     void MPU9250_Outputs_wrapper_accel(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp){
+			real_T *temp,
+			void **pW){
     MPU9250_Outputs_wrapper(acc,
 			gyro,
 			mag,
-			temp);
+			temp,
+			pW);
+    }
+    void MPU9250_Terminate_wrapper_accel(void **pW){
+    MPU9250_Terminate_wrapper(pW);
     }
 
     %closefile cFile
@@ -104,11 +112,13 @@
     #else
     #define SFB_EXTERN_C extern
     #endif
-    SFB_EXTERN_C void MPU9250_Start_wrapper_cgen(void);
+    SFB_EXTERN_C void MPU9250_Start_wrapper_cgen(void **pW);
     SFB_EXTERN_C void MPU9250_Outputs_wrapper_cgen(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp);
+			real_T *temp,
+			void **pW);
+    SFB_EXTERN_C void MPU9250_Terminate_wrapper_cgen(void **pW);
     #undef SFB_EXTERN_C
     #endif
     %closefile hFile
@@ -124,22 +134,29 @@
     #endif
     #include "%<hFileName>.h"
 
-	extern void MPU9250_Start_wrapper(void);
+	extern void MPU9250_Start_wrapper(void **pW);
 	extern void MPU9250_Outputs_wrapper(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp);
-	 void MPU9250_Start_wrapper_cgen(void) {
-	MPU9250_Start_wrapper();
+			real_T *temp,
+			void **pW);
+	extern void MPU9250_Terminate_wrapper(void **pW);
+	 void MPU9250_Start_wrapper_cgen(void **pW) {
+	MPU9250_Start_wrapper(pW);
 	}
 	 void MPU9250_Outputs_wrapper_cgen(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp) {
+			real_T *temp,
+			void **pW) {
 	MPU9250_Outputs_wrapper(acc,
 			gyro,
 			mag,
-			temp);
+			temp,
+			pW);
+	}
+	 void MPU9250_Terminate_wrapper_cgen(void **pW) {
+	MPU9250_Terminate_wrapper(pW);
 	}
     %closefile cFile
 
@@ -153,14 +170,15 @@
     #define SFB_EXTERN_C extern
     #endif
 
-    SFB_EXTERN_C void MPU9250_Start_wrapper(void);
+    SFB_EXTERN_C void MPU9250_Start_wrapper(void **pW);
 
     SFB_EXTERN_C void MPU9250_Outputs_wrapper(real_T *acc,
 			real_T *gyro,
 			real_T *mag,
-			real_T *temp);
+			real_T *temp,
+			void **pW);
 
-    SFB_EXTERN_C void MPU9250_Terminate_wrapper(void);
+    SFB_EXTERN_C void MPU9250_Terminate_wrapper(void **pW);
 
     #undef SFB_EXTERN_C
   %closefile externs
@@ -175,11 +193,12 @@
 %%
 %function Start(block, system) Output
    /* %<Type> Block: %<Name> */
+  %assign ppw = LibBlockDWorkAddr(PWORK, "", "", 0)
   
   %if IsModelReferenceSimTarget() || CodeFormat == "S-Function" || ::isRAccel
-    MPU9250_Start_wrapper_accel();
+    MPU9250_Start_wrapper_accel(%<ppw>);
   %else
-    MPU9250_Start_wrapper_cgen();
+    MPU9250_Start_wrapper_cgen(%<ppw>);
   %endif
 
 %endfunction
@@ -190,20 +209,34 @@
 %%
 %function Outputs(block, system) Output
   %%
+  %assign ppw = LibBlockDWorkAddr(PWORK, "", "", 0)
   %assign py0 = LibBlockOutputSignalAddr(0, "", "", 0)
   %assign py1 = LibBlockOutputSignalAddr(1, "", "", 0)
   %assign py2 = LibBlockOutputSignalAddr(2, "", "", 0)
   %assign py3 = LibBlockOutputSignalAddr(3, "", "", 0)
   
   %if IsModelReferenceSimTarget() || CodeFormat == "S-Function" || ::isRAccel
-    MPU9250_Outputs_wrapper_accel(%<py0>, %<py1>, %<py2>, %<py3>);
+    MPU9250_Outputs_wrapper_accel(%<py0>, %<py1>, %<py2>, %<py3>, %<ppw>);
   %else
-    MPU9250_Outputs_wrapper_cgen(%<py0>, %<py1>, %<py2>, %<py3>);
+    MPU9250_Outputs_wrapper_cgen(%<py0>, %<py1>, %<py2>, %<py3>, %<ppw>);
   %endif
 
   %%
 %endfunction
 
+%% Function: Terminate ========================================================
+%%
+%function Terminate(block, system) Output
+   /* %<Type> Block: %<Name> */
+  %assign ppw = LibBlockDWorkAddr(PWORK, "", "", 0)
+  
+  %if IsModelReferenceSimTarget() || CodeFormat == "S-Function" || ::isRAccel
+    MPU9250_Terminate_wrapper_accel(%<ppw>);
+  %else
+    MPU9250_Terminate_wrapper_cgen(%<ppw>);
+  %endif
+
+%endfunction
 
 %% [EOF] MPU9250.tlc
 
